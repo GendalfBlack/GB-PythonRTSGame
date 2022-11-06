@@ -24,6 +24,8 @@ class Vector2:
 class Block:
     blocks = {}
     def __init__(self, **args):
+        if "value" in args.keys():
+            self.action = args["value"]
         if "name" in args.keys():
             self.name = args["name"]
         if "text" in args.keys():
@@ -46,6 +48,23 @@ class Block:
                 arrow=LAST
                 )
 
+class Computation(Block):
+    counter = 0
+    def __init__(self, **args):
+        super().__init__(name="computation", text="start", **args)
+        Block.blocks[f"{self.name}{Computation.counter}"] = self
+    def draw(self):
+        self.width=100
+        self.height=30
+        self.shape = Prog.c.create_rectangle(
+            self.pos.x - self.width/2,
+            self.pos.y - self.height/2,
+            self.pos.x + self.width/2,
+            self.pos.y + self.height/2,
+            fill="white")
+        self.point_in = Vector2(self.pos.x, self.pos.y - self.height / 2)
+        self.point_out = Vector2(self.pos.x,self.pos.y + self.height / 2)
+        self.text = Prog.c.create_text(self.pos.x,self.pos.y,text=self.action)
 
 class Start(Block):
     def __init__(self, **args):
@@ -81,6 +100,8 @@ class Finish(Block):
 
 Prog(w)
 b1 = Start(pos=Vector2(100,100))
-b2 = Finish(pos=Vector2(100,200))
+b2 = Computation(pos=Vector2(100,200), value="i=0")
+b3 = Finish(pos=Vector2(100,300))
 b1+b2
+b2+b3
 w.mainloop()
