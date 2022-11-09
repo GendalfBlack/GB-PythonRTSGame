@@ -132,13 +132,14 @@ class Finish(Block):
         self.text = Prog.c.create_text(self.pos.x, self.pos.y, text=self.name)
 
 Prog(w)
-b1 = Start(pos=Vector2(250,100))
+b1 = Start(pos=Vector2(300,100))
 b2 = Condition(pos=Vector2(300,200), value="i<0")
 b3 = Computation(pos=Vector2(150,250), value="i=0")
 b4 = Computation(pos=Vector2(150,350), value="i+=1")
-b5 = Finish(pos=Vector2(450,250))
+b5 = Finish(pos=Vector2(450,450))
 b1+b2
 b2+b3
 b2+b5
 b3+b4
+b4+b5
 w.mainloop()
