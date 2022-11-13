@@ -4,9 +4,10 @@ from pygame import *
 class Game:
     gameobjects = []
     screen = None
-    def __init__(self):
+    def __init__(self, size):
         init()
-        Game.screen = display.set_mode((800, 600))
+        Game.screen = display.set_mode(size)
+
 
     def run(self):
         while True:

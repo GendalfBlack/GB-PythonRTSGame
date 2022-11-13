@@ -6,6 +6,7 @@ class SpriteLoader:
     def __init__(self):
         self.load("Sprites/tree-sprite.png", "tree")
         self.load("Sprites/house-sprite.png", "house")
+        self.load("Sprites/grass-tile.png", "grass")
     def load(self, path, name):
         SpriteLoader.sprites[name] = pygame.image.load(path)
 
