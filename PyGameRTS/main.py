@@ -1,14 +1,12 @@
-import sys
-from pygame import *
-from gameObject import *
 
-init()
+from gameObject import *
+from gameClass import Game
+
 SpriteLoader()
 
-screen = display.set_mode((800,600))
+w = Game()
 
-while True:
-    for _event in event.get():
-        if _event.type == QUIT:
-            quit()
-            sys.exit()
+g = GameObject((0,0), name="tree", sprite="tree", size=(100,100))
+GameObject((200,200), name="tree", sprite="house", size=(100,100))
+
+w.run()
