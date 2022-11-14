@@ -1,20 +1,24 @@
 import sys
 from pygame import *
+from spriteComponent import Render
+
 
 class Game:
-    gameobjects = []
     screen = None
+
     def __init__(self, size):
         init()
         Game.screen = display.set_mode(size)
 
-
-    def run(self):
+    @staticmethod
+    def run():
         while True:
-            for _event in event.get():
+            events = event.get()
+            for _event in events:
                 if _event.type == QUIT:
                     quit()
                     sys.exit()
-            for g in Game.gameobjects:
-                g.draw()
+
+            Render.render_sprites(Game.screen)
+
             display.flip()
