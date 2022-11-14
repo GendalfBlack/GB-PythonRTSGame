@@ -1,6 +1,10 @@
 import pygame
 
 
+class UI:
+    pass
+
+
 class SpriteLoader:
     sprites = {}
 
@@ -20,6 +24,8 @@ class SpriteComponent:
     def __init__(self, name, parent = None):
         if parent: self.parent = parent
         else: self.parent = None
+        if issubclass(type(parent), UI): self.layer = 0
+        else: self.layer = 1
 
         self.sprite = SpriteLoader.sprites[name]
         SpriteComponent.sprites.append(self)
@@ -29,7 +35,8 @@ class SpriteComponent:
         self.sprite = pygame.transform.scale(self.sprite, size)
 
     def __lt__(self, other):
-        return self.parent.pos[1] < other.parent.pos[1]
+        if self.layer < other.layer: return False
+        else: return self.parent.pos[1] < other.parent.pos[1]
 
 
 class Render:
