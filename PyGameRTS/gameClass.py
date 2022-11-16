@@ -1,6 +1,6 @@
 import sys
 from pygame import *
-from spriteComponent import Render
+from components import Render, OnClickComponent
 
 
 class Game:
@@ -15,6 +15,11 @@ class Game:
         while True:
             events = event.get()
             for _event in events:
+                if _event.type == MOUSEBUTTONDOWN:
+                    x,y = _event.pos
+                    for s in OnClickComponent.components:
+                        if Rect(s.parent.pos[0], s.parent.pos[1], s.sprite.size[0], s.sprite.size[1]).collidepoint(x,y):
+                            s()
                 if _event.type == QUIT:
                     quit()
                     sys.exit()

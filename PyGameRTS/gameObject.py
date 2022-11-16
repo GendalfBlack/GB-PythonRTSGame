@@ -1,19 +1,18 @@
-import pygame
-from gameClass import Game
-from spriteComponent import SpriteComponent
+from components import *
 
 
-class GameObject:
+class GameObject2D(GameObject):
     clicked = None
 
-    def __init__(self, pos = None, **args):
+    def __init__(self, pos=(0,0), **args):
+        super().__init__()
         self.pos = pos
         if "name" in args.keys(): self.name = args["name"]
-        else: self.name = "Empty"
-        if "sprite" in args.keys(): self.sprite = SpriteComponent(args["sprite"], self)
-        else: self.sprite = None
-        if "size" in args.keys():
-            self.size = args["size"]
-            self.sprite.resize(self.size)
-        else: self.size = (0,0)
+        else: self.name = "New GameObject"
+        if "sprite" in args.keys(): self.components["sprite"] = SpriteComponent(args["sprite"], self)
+        else: self.components["sprite"] = None
+        if "size" in args.keys() and "sprite" in self.components.keys():
+            self.components["sprite"].resize(args["size"])
 
+    def addComponent(self, other):
+        if isinstance(other, Component): self.components[other.name] = other
