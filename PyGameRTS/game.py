@@ -17,8 +17,11 @@ class Game:
             for _event in events:
                 if _event.type == MOUSEBUTTONDOWN:
                     x,y = _event.pos
-                    for s in OnClick.components:
-                        if Rect(s.parent.pos[0], s.parent.pos[1], s.sprite.size[0], s.sprite.size[1]).collidepoint(x,y):
+                    for s in OnClick.onClickEvents:
+                        sx, sy = s.parent.pos[0], s.parent.pos[1]
+                        sw = s.parent.components["sprite"].size[0]
+                        sh = s.parent.components["sprite"].size[1]
+                        if Rect(sx, sy, sw, sh).collidepoint(x, y):
                             s()
                 if _event.type == QUIT:
                     quit()
