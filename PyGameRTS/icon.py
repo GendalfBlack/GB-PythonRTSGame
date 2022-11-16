@@ -1,12 +1,12 @@
 from components import *
 
 
-class UIIcon(UI):
+class Icon(UI):
     def __init__(self, pos=(0,0), **args):
         super().__init__()
         self.ui = True
         self.pos = pos
-        if "sprite" in args.keys(): self.sprite = SpriteComponent(args["sprite"], self)
+        if "sprite" in args.keys(): self.sprite = Sprite(args["sprite"], self)
         else: self.sprite = None
         if "size" in args.keys():
             self.size = args["size"]

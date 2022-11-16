@@ -36,7 +36,7 @@ class SpriteLoader:
         SpriteLoader.sprites[name] = pygame.image.load(path)
 
 
-class SpriteComponent(Component):
+class Sprite(Component):
     sprites = []
 
     def __init__(self, name, parent=None):
@@ -47,8 +47,8 @@ class SpriteComponent(Component):
         else: self.layer = 1
         self.size = None
         self.sprite = SpriteLoader.sprites[name]
-        SpriteComponent.sprites.append(self)
-        SpriteComponent.sprites.sort()
+        Sprite.sprites.append(self)
+        Sprite.sprites.sort()
 
     def resize(self, size):
         self.size = size
@@ -62,11 +62,11 @@ class SpriteComponent(Component):
 class Render:
     @staticmethod
     def render_sprites(screen):
-        for s in SpriteComponent.sprites:
+        for s in Sprite.sprites:
             screen.blit(s.sprite, s.parent.pos)
 
 
-class OnClickComponent(Component):
+class OnClick(Component):
     components = []
 
     def __init__(self, parent=None):
@@ -80,7 +80,7 @@ class OnClickComponent(Component):
 
     def addEvent(self, other):
         self.function = other
-        OnClickComponent.components.append(self)
+        OnClick.components.append(self)
 
     def __call__(self, *args, **kwargs):
         self.function(*args, **kwargs)
