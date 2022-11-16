@@ -24,8 +24,13 @@ class GameObject(ComponentsHolder):
 
 
 class UI(ComponentsHolder):
+    font = None
+    font_size = 0
+
     def __init__(self):
         super().__init__()
+        UI.font_size = 25
+        UI.font = pygame.font.SysFont('Minecraft', UI.font_size)
 
 
 class Background(ComponentsHolder):
@@ -53,10 +58,21 @@ class Sprite(Component):
 
     def __init__(self, name, size):
         super().__init__("sprite")
-        self.layer = 0
         self.size = size
-        self.sprite = SpriteLoader.sprites[name]
+        self._sprite = SpriteLoader.sprites[name]
         self.resize(self.size)
+
+    @property
+    def sprite(self):
+        return self._sprite
+
+    @sprite.setter
+    def sprite(self, s):
+        self._sprite = s
+        self.resize()
+
+    def swap(self, s):
+        self.sprite = s
 
     @property
     def parent(self):
@@ -75,12 +91,43 @@ class Sprite(Component):
             Sprite.sprites.append(self)
             Sprite.sprites.sort()
 
-    def resize(self, size):
-        self.size = size
-        self.sprite = pygame.transform.scale(self.sprite, size)
+    def resize(self, size=None):
+        if size:
+            self.size = size
+        self._sprite = pygame.transform.scale(self._sprite, self.size)
 
     def __lt__(self, other):
         return self.parent.pos[1] < other.parent.pos[1]
+
+
+class Text(Component):
+    texts = []
+
+    def __init__(self, text, color=(0,0,0)):
+        super().__init__("text")
+        self._text = text
+        self.color = color
+        self.dx = 0
+        self.dy = 0
+
+    @property
+    def text(self):
+        return self._text
+
+    @text.setter
+    def text(self, t):
+        self._text = t
+        self.dx = len(self._text)//2*UI.font_size*0.72
+        self.dy = UI.font_size*0.16
+
+    @property
+    def parent(self):
+        return self._parent
+
+    @parent.setter
+    def parent(self, p):
+        self._parent = p
+        Text.texts.append(self)
 
 
 class Render:
@@ -92,6 +139,9 @@ class Render:
             screen.blit(s.sprite, s.parent.pos)
         for s in Sprite.ui:
             screen.blit(s.sprite, s.parent.pos)
+        for t in Text.texts:
+            x, y = t.parent.pos[0], t.parent.pos[1]
+            screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy))
 
 
 class OnClick(Component):
