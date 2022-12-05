@@ -130,15 +130,19 @@ class Text(Component):
         Text.texts.append(self)
 
 
+class Camera:
+    pos = pygame.Vector2()
+
+
 class Render:
     @staticmethod
     def render_sprites(screen):
         for s in Sprite.background:
-            screen.blit(s.sprite, s.parent.pos)
+            screen.blit(s.sprite, (s.parent.pos[0] + Camera.pos.x, s.parent.pos[1] + Camera.pos.y))
         for s in Sprite.sprites:
-            screen.blit(s.sprite, s.parent.pos)
+            screen.blit(s.sprite, (s.parent.pos[0] + Camera.pos.x, s.parent.pos[1] + Camera.pos.y))
         for s in Sprite.ui:
-            screen.blit(s.sprite, s.parent.pos)
+            screen.blit(s.sprite, (s.parent.pos[0], s.parent.pos[1]))
         for t in Text.texts:
             x, y = t.parent.pos[0], t.parent.pos[1]
             screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy))
