@@ -56,6 +56,7 @@ class Transform(Component):
     def __init__(self, pos=(0,0)):
         super().__init__("transform")
         self.pos = pygame.Vector2(pos[0],pos[1])
+        self.size = pygame.Vector2()
 
 
 class Sprite(Component):
@@ -65,7 +66,10 @@ class Sprite(Component):
 
     def __init__(self, name, size):
         super().__init__("sprite")
-        self.size = size
+        if type(size) is tuple:
+            self.size = pygame.Vector2(size[0], size[1])
+        else:
+            self.size = pygame.Vector2()
         self._sprite = SpriteLoader.sprites[name]
         self.resize(self.size)
 
@@ -97,6 +101,7 @@ class Sprite(Component):
         else:
             Sprite.sprites.append(self)
             Sprite.sprites.sort()
+        p.transform.size = self.size
 
     def resize(self, size=None):
         if size:
@@ -134,6 +139,8 @@ class Text(Component):
     @parent.setter
     def parent(self, p):
         self._parent = p
+        w, h = UI.font_size*0.67*len(self._text), UI.font_size*0.89
+        p.transform.size = pygame.Vector2(w, h)
         Text.texts.append(self)
 
 
@@ -155,7 +162,7 @@ class Render:
             screen.blit(s.sprite, (x, y))
         for t in Text.texts:
             x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
-            screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy))
+            screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy-UI.font_size*0.16))
 
 
 class OnClick(Component):

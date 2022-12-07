@@ -3,7 +3,7 @@ import random as rnd
 from game import Game
 from components import *
 
-from uiElements import Icon, TextUI
+from uiElements import *
 from tile import Tile
 from mapObject import MapObject
 
@@ -23,6 +23,17 @@ u1.addComponent(Sprite("house", (100,100)))
 
 t1 = TextUI((w-100, h-50))
 t1.addComponent(Text(""))
+
+
+def addTree():
+    tree = MapObject((rnd.randint(0, 70) * 10, rnd.randint(0, 50) * 10))
+    tree.addComponent(Sprite("tree", (100, 100)))
+    tree.addComponent(OnClick())
+    tree.components["onClick"].addEvent(lambda: showInfo(tree))
+
+
+b1 = Button((w-150, h-250))
+b1.components["onClick"].addEvent(addTree)
 
 
 def showInfo(obj):
