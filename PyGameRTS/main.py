@@ -13,10 +13,13 @@ w,h = 800,600
 
 root = Game((w, h))
 
-for i in range(w//50):
-    for j in range(h//50):
-        t = Tile((i*50,j*50))
-        t.addComponent(Sprite("grass", (50,50)))
+for i in range(w//100):
+    for j in range(h//25):
+        if j % 2 ==0:
+            t = Tile((i * 100, j * 25))
+        else:
+            t = Tile((i * 100 + 50, j * 25))
+        t.addComponent(Sprite("grass", (100,100)))
 
 u1 = Icon((w-150, h-150))
 u1.addComponent(Sprite("house", (100,100)))
