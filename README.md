@@ -4,4 +4,4 @@
 Currently working on RTS in PyGame.
 ![FirstPreview](https://github.com/GendalfBlack/GB-PythonProjects/blob/main/PyGameRTS/preview1.png)
 Latest update:
-![TextAddition](https://github.com/GendalfBlack/GB-PythonProjects/blob/main/PyGameRTS/preview2.png?raw=true)
+![TextAddition](https://github.com/GendalfBlack/GB-PythonProjects/blob/main/PyGameRTS/preview3.png?raw=true)
