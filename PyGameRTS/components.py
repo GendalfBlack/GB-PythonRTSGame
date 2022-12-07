@@ -8,9 +8,10 @@ class Component:
 
 
 class ComponentsHolder:
-    def __init__(self):
+    def __init__(self, pos=(0,0)):
         self.components = {}
-        self.pos = (0, 0)
+        self.transform = Transform(pos)
+        self.addComponent(self.transform)
 
     def addComponent(self, other):
         if isinstance(other, Component):
@@ -19,23 +20,23 @@ class ComponentsHolder:
 
 
 class GameObject(ComponentsHolder):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pos):
+        super().__init__(pos)
 
 
 class UI(ComponentsHolder):
     font = None
     font_size = 0
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pos):
+        super().__init__(pos)
         UI.font_size = 25
         UI.font = pygame.font.SysFont('Minecraft', UI.font_size)
 
 
 class Background(ComponentsHolder):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, pos):
+        super().__init__(pos)
 
 
 class SpriteLoader:
@@ -49,6 +50,12 @@ class SpriteLoader:
     @staticmethod
     def load(path, name):
         SpriteLoader.sprites[name] = pygame.image.load(path)
+
+
+class Transform(Component):
+    def __init__(self, pos=(0,0)):
+        super().__init__("transform")
+        self.pos = pygame.Vector2(pos[0],pos[1])
 
 
 class Sprite(Component):
@@ -97,7 +104,7 @@ class Sprite(Component):
         self._sprite = pygame.transform.scale(self._sprite, self.size)
 
     def __lt__(self, other):
-        return self.parent.pos[1] < other.parent.pos[1]
+        return self.parent.transform.pos.y < other.parent.transform.pos.y
 
 
 class Text(Component):
@@ -138,13 +145,16 @@ class Render:
     @staticmethod
     def render_sprites(screen):
         for s in Sprite.background:
-            screen.blit(s.sprite, (s.parent.pos[0] + Camera.pos.x, s.parent.pos[1] + Camera.pos.y))
+            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+            screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
         for s in Sprite.sprites:
-            screen.blit(s.sprite, (s.parent.pos[0] + Camera.pos.x, s.parent.pos[1] + Camera.pos.y))
+            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+            screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
         for s in Sprite.ui:
-            screen.blit(s.sprite, (s.parent.pos[0], s.parent.pos[1]))
+            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+            screen.blit(s.sprite, (x, y))
         for t in Text.texts:
-            x, y = t.parent.pos[0], t.parent.pos[1]
+            x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
             screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy))
 
 

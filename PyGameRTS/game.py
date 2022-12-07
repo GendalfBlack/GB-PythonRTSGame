@@ -6,6 +6,7 @@ from components import Render, OnClick, Camera
 class Game:
     screen = None
     size = None
+    scroll_speed = 5
 
     def __init__(self, size):
         init()
@@ -24,7 +25,7 @@ class Game:
                 if _event.type == MOUSEBUTTONDOWN:
                     x,y = _event.pos
                     for s in OnClick.onClickEvents:
-                        sx, sy = s.parent.pos[0], s.parent.pos[1]
+                        sx, sy = s.parent.transform.pos.x, s.parent.transform.pos.y
                         sw = s.parent.components["sprite"].size[0]
                         sh = s.parent.components["sprite"].size[1]
                         if Rect(sx, sy, sw, sh).collidepoint(x, y):
@@ -42,13 +43,13 @@ class Game:
 
             x, y = mouse.get_pos()
             if press_up or 0 < y < 10:
-                Camera.pos.y += 1
+                Camera.pos.y += Game.scroll_speed
             if press_left or 0 < x < 10:
-                Camera.pos.x += 1
+                Camera.pos.x += Game.scroll_speed
             if press_right or Game.size.x - 10 < x < Game.size.x:
-                Camera.pos.x -= 1
+                Camera.pos.x -= Game.scroll_speed
             if press_down or Game.size.y - 10 < y < Game.size.y:
-                Camera.pos.y -= 1
+                Camera.pos.y -= Game.scroll_speed
 
             Render.render_sprites(Game.screen)
 
