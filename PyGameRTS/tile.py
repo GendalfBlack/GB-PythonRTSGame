@@ -13,3 +13,6 @@ class Tile(Background):
     @staticmethod
     def getRandom():
         return rnd.choice(list(Tile.tiles.values()))
+
+    def printCord(self):
+        print(self.cord)
