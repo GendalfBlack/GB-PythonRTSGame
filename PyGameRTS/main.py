@@ -25,7 +25,6 @@ u1 = Icon((w-150, h-150))
 u1.addComponent(Sprite("house", (100,100)))
 
 t1 = TextUI((w-100, h-50))
-t1.addComponent(Text(""))
 
 
 def addTree():

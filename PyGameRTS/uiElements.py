@@ -9,6 +9,7 @@ class Icon(UI):
 class TextUI(UI):
     def __init__(self, pos=(0,0)):
         super().__init__(pos)
+        self.addComponent(Text(""))
 
 
 class Button(UI):

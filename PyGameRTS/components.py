@@ -46,6 +46,7 @@ class SpriteLoader:
         SpriteLoader.load("Sprites/tree-sprite.png", "tree")
         SpriteLoader.load("Sprites/house-sprite.png", "house")
         SpriteLoader.load("Sprites/grass-tile.png", "grass")
+        SpriteLoader.load("Sprites/black-color.png", "black")
 
     @staticmethod
     def load(path, name):
@@ -113,14 +114,18 @@ class Sprite(Component):
 
 
 class Text(Component):
+    TOP = 1
+    LEFT = 2
+    CENTER = 4
     texts = []
 
-    def __init__(self, text, color=(0,0,0)):
+    def __init__(self, text, color=(0,0,0), flags=CENTER):
         super().__init__("text")
         self._text = text
         self.color = color
         self.dx = 0
         self.dy = 0
+        self.flags = flags
 
     @property
     def text(self):
@@ -129,8 +134,9 @@ class Text(Component):
     @text.setter
     def text(self, t):
         self._text = t
-        self.dx = len(self._text)//2*UI.font_size*0.72
-        self.dy = UI.font_size*0.16
+        if self.flags == Text.CENTER:
+            self.dx = len(self._text)//2*UI.font_size*0.72
+            self.dy = UI.font_size*0.16
 
     @property
     def parent(self):
@@ -149,20 +155,31 @@ class Camera:
 
 
 class Render:
+    NONE = 1
+    BACKGROUND = 2
+    SPRITE = 4
+    UI = 8
+    TEXT = 16
+    ALL = 30
+
     @staticmethod
-    def render_sprites(screen):
-        for s in Sprite.background:
-            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-            screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
-        for s in Sprite.sprites:
-            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-            screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
-        for s in Sprite.ui:
-            x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-            screen.blit(s.sprite, (x, y))
-        for t in Text.texts:
-            x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
-            screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy-UI.font_size*0.16))
+    def render_sprites(screen, flags=NONE):
+        if flags & Render.BACKGROUND:
+            for s in Sprite.background:
+                x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+                screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+        if flags & Render.SPRITE:
+            for s in Sprite.sprites:
+                x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+                screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+        if flags & Render.UI:
+            for s in Sprite.ui:
+                x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
+                screen.blit(s.sprite, (x, y))
+        if flags & Render.TEXT:
+            for t in Text.texts:
+                x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
+                screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy-UI.font_size*0.16))
 
 
 class OnClick(Component):
