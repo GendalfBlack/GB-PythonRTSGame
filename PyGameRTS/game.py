@@ -1,6 +1,6 @@
 import sys
 from pygame import *
-from components import Render, OnClick, Camera
+from components import Render, OnClick, Camera, UI
 
 
 class Game:
@@ -9,6 +9,7 @@ class Game:
     screen = None
     size = None
     scroll_speed = 100
+    draw_hit_box = False
 
     def __init__(self, size):
         init()
@@ -28,7 +29,11 @@ class Game:
                 if _event.type == MOUSEBUTTONDOWN:
                     x,y = _event.pos
                     for s in OnClick.onClickEvents:
-                        sx, sy = s.parent.transform.pos.x, s.parent.transform.pos.y
+                        if not isinstance(s.parent, UI):
+                            sx, sy = s.parent.transform.pos.x + Camera.pos.x, \
+                                     s.parent.transform.pos.y + Camera.pos.y
+                        else:
+                            sx, sy = s.parent.transform.pos.x, s.parent.transform.pos.y
                         sw = s.parent.transform.size.x
                         sh = s.parent.transform.size.y
                         if Rect(sx, sy, sw, sh).collidepoint(x, y):
@@ -38,11 +43,13 @@ class Game:
                     if _event.key == K_a: press_left = True
                     if _event.key == K_s: press_down = True
                     if _event.key == K_d: press_right = True
+                    if _event.key == K_F3: Game.draw_hit_box = True
                 if _event.type == KEYUP:
                     if _event.key == K_w: press_up = False
                     if _event.key == K_a: press_left = False
                     if _event.key == K_s: press_down = False
                     if _event.key == K_d: press_right = False
+                    if _event.key == K_F3: Game.draw_hit_box = False
                 if _event.type == QUIT:
                     quit()
                     sys.exit()
@@ -58,5 +65,19 @@ class Game:
                 Camera.pos.y -= Game.scroll_speed * dt
 
             Render.render_sprites(Game.screen)
+
+            if Game.draw_hit_box:
+                for s in OnClick.onClickEvents:
+                    if not isinstance(s.parent, UI):
+                        sx, sy = s.parent.transform.pos.x + Camera.pos.x, \
+                                 s.parent.transform.pos.y + Camera.pos.y
+                    else:
+                        sx, sy = s.parent.transform.pos.x, s.parent.transform.pos.y
+                    sw = s.parent.transform.size.x
+                    sh = s.parent.transform.size.y
+                    draw.line(Game.screen, (255, 0, 0), [sx, sy], [sx + sw, sy], 2)
+                    draw.line(Game.screen, (255, 0, 0), [sx, sy], [sx, sy + sh], 2)
+                    draw.line(Game.screen, (255, 0, 0), [sx, sy + sh], [sx + sw, sy + sh], 2)
+                    draw.line(Game.screen, (255, 0, 0), [sx + sw, sy], [sx + sw, sy + sh], 2)
 
             display.flip()
