@@ -17,7 +17,6 @@ c = Chunk()
 c.Generate()
 c.Collapse()
 
-'''
 u1 = Icon((w-150, h-150))
 u1.addComponent(Sprite("house", (100,100)))
 
@@ -55,6 +54,6 @@ m2 = MapObject(Tile.getRandom())
 m2.addComponent(Sprite("house", (150, 150)))
 m2.addComponent(OnClick())
 m2.components["onClick"].addEvent(lambda: showInfo(m2))
-m2.addComponent(Collider2D())'''
+m2.addComponent(Collider2D())
 
 root.run()
