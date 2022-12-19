@@ -3,7 +3,6 @@ from pygame import *
 from components import Render, OnClick, Camera, UI, SpriteLoader, Sprite, Collider2D
 from uiElements import TextUI, Icon
 
-
 class Game:
     FPS = 60
     clock = time.Clock()
@@ -18,6 +17,7 @@ class Game:
     def __init__(self, size):
         init()
         Game.screen = display.set_mode([size[0],size[1]])
+        Render.screen = Game.screen
         Game.size = Vector2(size[0],size[1])
         Game.fpsUIText = TextUI()
         Game.fpsUIText.components["text"].color = (100, 255, 100)
@@ -34,7 +34,7 @@ class Game:
         show_fps = False
         for s in SpriteLoader.sprites.values():
             s.convert()
-        Render.render_sprites(Game.screen, Render.ALL)
+        Render.render_frame(Render.ALL)
         while True:
             dt = Game.clock.tick(60)/1000
             events = event.get()
@@ -54,7 +54,7 @@ class Game:
                         if "collider2D" in s.parent.components.keys():
                             col = s.parent.components["collider2D"]
                             if col.collide_point(x, y):
-                                s(); flags = Render.ALL
+                                s(); flags = Render.ALL; break
                 if _event.type == KEYDOWN:
                     if _event.key == K_w: press_up = True
                     if _event.key == K_a: press_left = True
@@ -87,7 +87,7 @@ class Game:
                 if 0 < Camera.pos.y - Game.scroll_speed * dt < Game.size[1] - 75:
                     Camera.pos.y -= Game.scroll_speed * dt; flags = Render.ALL
 
-            Render.render_sprites(Game.screen, flags)
+            Render.render_frame(flags)
 
             if Game.draw_hit_box:
                 for col in Collider2D.colliders:

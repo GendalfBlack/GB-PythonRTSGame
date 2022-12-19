@@ -1,4 +1,6 @@
 import pygame
+from os import listdir
+from os.path import isfile, join
 
 
 class Component:
@@ -8,7 +10,7 @@ class Component:
 
 
 class ComponentsHolder:
-    def __init__(self, pos=(0,0)):
+    def __init__(self, pos=(0, 0)):
         self.components = {}
         self.transform = Transform(pos)
         self.addComponent(self.transform)
@@ -47,6 +49,10 @@ class SpriteLoader:
         SpriteLoader.load("Sprites/house-sprite.png", "house")
         SpriteLoader.load("Sprites/grass-tile.png", "grass")
         SpriteLoader.load("Sprites/black-color.png", "black")
+        path = "D:/2.3.PythonPublic/GB-PythonProjects/PyGameRTS/Hand-drawn-sprites"
+        tiles = [f for f in listdir(path) if isfile(join(path,f))]
+        for t in tiles:
+            SpriteLoader.load("Hand-drawn-sprites/"+t, t.split('.')[0])
 
     @staticmethod
     def load(path, name):
@@ -54,9 +60,9 @@ class SpriteLoader:
 
 
 class Transform(Component):
-    def __init__(self, pos=(0,0)):
+    def __init__(self, pos=(0, 0)):
         super().__init__("transform")
-        self.pos = pygame.Vector2(pos[0],pos[1])
+        self.pos = pygame.Vector2(pos[0], pos[1])
         self.size = pygame.Vector2()
 
 
@@ -72,6 +78,9 @@ class Sprite(Component):
         else:
             self.size = pygame.Vector2()
         self._sprite = SpriteLoader.sprites[name]
+        self.sprite_name = name
+        if name.count("_") > 0:
+            self.sides = name.split("_")
         self.resize(self.size)
 
     @property
@@ -119,7 +128,7 @@ class Text(Component):
     CENTER = 4
     texts = []
 
-    def __init__(self, text, color=(0,0,0), flags=CENTER):
+    def __init__(self, text, color=(0, 0, 0), flags=CENTER):
         super().__init__("text")
         self._text = text
         self.color = color
@@ -135,8 +144,8 @@ class Text(Component):
     def text(self, t):
         self._text = t
         if self.flags == Text.CENTER:
-            self.dx = len(self._text)//2*UI.font_size*0.72
-            self.dy = UI.font_size*0.16
+            self.dx = len(self._text) // 2 * UI.font_size * 0.72
+            self.dy = UI.font_size * 0.16
 
     @property
     def parent(self):
@@ -145,14 +154,14 @@ class Text(Component):
     @parent.setter
     def parent(self, p):
         self._parent = p
-        w, h = UI.font_size*0.67*len(self._text), UI.font_size*0.89
+        w, h = UI.font_size * 0.67 * len(self._text), UI.font_size * 0.89
         p.transform.size = pygame.Vector2(w, h)
         Text.texts.append(self)
 
 
 class Camera:
     pos = pygame.Vector2()
-    cord = (0,0)
+    cord = (0, 0)
 
 
 class Render:
@@ -161,29 +170,53 @@ class Render:
     SPRITE = 4
     UI = 8
     TEXT = 16
-    ALL = 30
+    OVERLAY = 32
+    ALL = 63
+
+    screen = None
+    shapes = {}
 
     @staticmethod
-    def render_sprites(screen, flags=NONE):
+    def draw_rectangle(owner, points, color=(255, 0, 0, 0)):
+        if owner not in Render.shapes.keys():
+            Render.shapes[owner] = points, color
+
+    @staticmethod
+    def remove_rectangle(owner):
+        if owner in Render.shapes.keys():
+            Render.shapes.pop(owner)
+
+    @staticmethod
+    def render_frame(flags=NONE):
         if flags & Render.BACKGROUND:
             for s in Sprite.background:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+                Render.screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
         if flags & Render.SPRITE:
             for s in Sprite.sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+                Render.screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
         if flags & Render.UI:
             for s in Sprite.ui:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                screen.blit(s.sprite, (x, y))
+                Render.screen.blit(s.sprite, (x, y))
         if flags & Render.TEXT:
             for t in Text.texts:
                 x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
-                screen.blit(UI.font.render(t.text, True, t.color), (x-t.dx, y - t.dy-UI.font_size*0.16))
+                Render.screen.blit(UI.font.render(t.text, True, t.color), (x - t.dx, y - t.dy - UI.font_size * 0.16))
+        if flags & Render.OVERLAY:
+            for s in Render.shapes.values():
+                points, color = s
+                cpoints = []
+                for p in points:
+                    cpoints.append((p[0] + Camera.pos.x, p[1] + Camera.pos.y))
+                pygame.draw.polygon(Render.screen, color, cpoints, width=2)
 
 
 class OnClick(Component):
+    BG_LAYER = 0
+    GO_LAYER = 0
+    UI_LAYER = 0
     onClickEvents = []
 
     def __init__(self):
@@ -200,7 +233,15 @@ class OnClick(Component):
 
     def addEvent(self, other):
         self.function = other
-        OnClick.onClickEvents.append(self)
+        if isinstance(self.parent, Background):
+            OnClick.onClickEvents.insert(OnClick.BG_LAYER, self)
+        elif isinstance(self.parent, GameObject):
+            OnClick.onClickEvents.insert(OnClick.GO_LAYER, self)
+            OnClick.BG_LAYER += 1
+        else:
+            OnClick.onClickEvents.insert(OnClick.UI_LAYER, self)
+            OnClick.BG_LAYER += 1
+            OnClick.GO_LAYER += 1
 
     def __call__(self, *args, **kwargs):
         self.function(*args, **kwargs)
