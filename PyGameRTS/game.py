@@ -9,7 +9,7 @@ class Game:
     clock = time.Clock()
     screen = None
     size = None
-    scroll_speed = 100
+    scroll_speed = 150
     mouse_scroll = False
     draw_hit_box = False
     fpsUIText = None

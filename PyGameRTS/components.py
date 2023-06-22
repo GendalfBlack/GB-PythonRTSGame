@@ -230,6 +230,7 @@ class OnClick(Component):
     def __init__(self):
         super().__init__("onClick")
         self.function = None
+        self.params = None
 
     @property
     def parent(self):
@@ -239,8 +240,9 @@ class OnClick(Component):
     def parent(self, p):
         self._parent = p
 
-    def addEvent(self, other):
+    def addEvent(self, other, *params):
         self.function = other
+        self.params = params
         if isinstance(self.parent, Background):
             OnClick.onClickEvents.insert(OnClick.BG_LAYER, self)
         elif isinstance(self.parent, GameObject):
@@ -251,8 +253,8 @@ class OnClick(Component):
             OnClick.BG_LAYER += 1
             OnClick.GO_LAYER += 1
 
-    def __call__(self, *args, **kwargs):
-        self.function(*args, **kwargs)
+    def __call__(self):
+        self.function(self.params[0])
 
 
 class Collider2D(Component):

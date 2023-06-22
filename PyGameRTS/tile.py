@@ -57,7 +57,6 @@ class Tile(Background):
             return
 
         Render.draw_rectangle(self.id, self.components["collider2D"].points, color)
-        print(self.id)
         self.selected = True
 
     def Collapse(self):

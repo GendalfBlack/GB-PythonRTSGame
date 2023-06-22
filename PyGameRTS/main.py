@@ -45,19 +45,24 @@ b1.components["onClick"].addEvent(addTree)
 b1.addComponent(Collider2D())
 
 
+last = None
 def showInfo(obj):
+    global last
+    if last != None:
+        last.tile.selectTile()
     u1.components["sprite"].swap(obj.components["sprite"].sprite)
     t1.components["text"].text = "100/100"
     obj.tile.selectTile()
+    last = obj
 
-'''
-for i in range(1):
+
+for i in range(25):
     m = MapObject(Tile.getRandom())
     m.addComponent(Sprite("tree", (100, 100)))
     m.addComponent(OnClick())
-    m.components["onClick"].addEvent(lambda: showInfo(m))
+    m.components["onClick"].addEvent(showInfo, m)
     m.addComponent(Collider2D())
-
+'''
 m2 = MapObject(Tile.getRandom())
 m2.addComponent(Sprite("house", (150, 150)))
 m2.addComponent(OnClick())
