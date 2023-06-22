@@ -2,6 +2,7 @@ import sys
 from pygame import *
 from components import Render, OnClick, Camera, UI, SpriteLoader, Sprite, Collider2D
 from uiElements import TextUI, Icon
+from tile import Chunk
 
 class Game:
     FPS = 60
@@ -74,21 +75,20 @@ class Game:
                     sys.exit()
 
             x, y = mouse.get_pos()
+            view_x, view_y = Chunk.GetViewSize()
             if press_up or (-10 < y < 10 and Game.mouse_scroll):
-                if 0 < Camera.pos.y + Game.scroll_speed * dt < Game.size[1] - 75:
+                if -view_y - 60 < Camera.pos.y + Game.scroll_speed * dt < -60:
                     Camera.pos.y += Game.scroll_speed * dt; flags = Render.ALL
             if press_left or (-10 < x < 10 and Game.mouse_scroll):
-                if 0 < Camera.pos.x + Game.scroll_speed * dt < Game.size[0] - 50:
+                if -view_x + 50 < Camera.pos.x + Game.scroll_speed * dt < - 50:
                     Camera.pos.x += Game.scroll_speed * dt; flags = Render.ALL
             if press_right or (Game.size.x - 10 < x < Game.size.x + 10 and Game.mouse_scroll):
-                if 0 < Camera.pos.x - Game.scroll_speed * dt < Game.size[0] - 50:
+                if -view_x + 50< Camera.pos.x - Game.scroll_speed * dt < - 50:
                     Camera.pos.x -= Game.scroll_speed * dt; flags = Render.ALL
             if press_down or (Game.size.y - 10 < y < Game.size.y + 10 and Game.mouse_scroll):
-                if 0 < Camera.pos.y - Game.scroll_speed * dt < Game.size[1] - 75:
+                if -view_y - 60 < Camera.pos.y - Game.scroll_speed * dt < -60:
                     Camera.pos.y -= Game.scroll_speed * dt; flags = Render.ALL
-
             Render.render_frame(flags)
-
             if Game.draw_hit_box:
                 for col in Collider2D.colliders:
                     col.draw_hit_box(Game.screen)

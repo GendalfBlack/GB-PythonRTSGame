@@ -168,8 +168,8 @@ class Text(Component):
 
 
 class Camera:
-    pos = pygame.Vector2()
-    cord = (0, 0)
+    pos = pygame.Vector2(-50,-75)
+    cord = (-50,-75)
 
 
 class Render:

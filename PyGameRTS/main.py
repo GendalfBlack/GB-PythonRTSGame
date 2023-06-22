@@ -1,4 +1,6 @@
 import random as rnd
+import sys
+sys.setrecursionlimit(10000)
 
 from game import Game
 from components import *
@@ -13,9 +15,15 @@ w,h = 800,600
 
 root = Game((w, h))
 
-c = Chunk()
-c.Generate()
-c.Collapse()
+for i in range(0, 5):
+    for j in range(0, 5):
+        c = Chunk((i,j))
+        c.Generate()
+Chunk.sum_width = 5
+Chunk.sum_height = 5
+Chunk.CalculateNeighbours()
+Chunk.Collapse()
+
 
 u1 = Icon((w-150, h-150))
 u1.addComponent(Sprite("house", (100,100)))
@@ -42,7 +50,7 @@ def showInfo(obj):
     t1.components["text"].text = "100/100"
     obj.tile.selectTile()
 
-
+'''
 for i in range(1):
     m = MapObject(Tile.getRandom())
     m.addComponent(Sprite("tree", (100, 100)))
@@ -54,6 +62,6 @@ m2 = MapObject(Tile.getRandom())
 m2.addComponent(Sprite("house", (150, 150)))
 m2.addComponent(OnClick())
 m2.components["onClick"].addEvent(lambda: showInfo(m2))
-m2.addComponent(Collider2D())
+m2.addComponent(Collider2D())'''
 
 root.run()
