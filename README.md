@@ -37,7 +37,7 @@ To use this game engine, follow these steps:
 
 1. Clone the repository: `git clone <repository-url>`
 2. Install the required dependencies: `pip install pygame`
-3. Import the necessary classes into your project from the `game.py`, `components.py`, 'tile.py', and 'mapObject.py' files.
+3. Import the necessary classes into your project from the `game.py`, `components.py`, `tile.py`, and `mapObject.py` files.
 4. Create instances of the classes and use them to build your game.
 
 ## Usage
