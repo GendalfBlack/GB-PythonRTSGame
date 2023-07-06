@@ -1,14 +1,13 @@
 from components import *
 import random as rnd
 
+
 class Tile(Background):
     SOUTH = 2
     WEST = 3
     NORTH = 0
     EAST = 1
     tiles = {}
-    unknown_tiles = {}
-    next = None
 
     @property
     def SpriteLeft(self):
@@ -28,11 +27,10 @@ class Tile(Background):
         if "sprite" in self.components.keys():
             self.components["sprite"].swap(value.sprite)
         else:
-            self.addComponent(Sprite(value.sprite_name, (100, 100)))
+            self.addComponent(Sprite(value, (100, 100)))
 
     def __init__(self, pos=(0, 0), cord=(0, 0)):
         super().__init__(pos)
-        Tile.unknown_tiles[f"{cord[0]},{cord[1]}"] = self
         Tile.tiles[f"{cord[0]},{cord[1]}"] = self
         self.id = f"{cord[0]},{cord[1]}"
         self.cord = cord
@@ -76,7 +74,7 @@ class Tile(Background):
             while j < len(self.possible):
                 for i in range(4):
                     if self.sides[i] != "":
-                        if self.possible[j].sides[i] != self.sides[i]:
+                        if self.possible[j].split('_')[i] != self.sides[i]:
                             self.possible.remove(self.possible[j])
                             j -= 1
                             break
@@ -87,7 +85,6 @@ class Tile(Background):
             self.Sprite = rnd.choice(self.possible)
             self.possible.clear()
         self.isCollapsed = True
-        del Tile.unknown_tiles[self.id]
         for n in self.neighbours:
             self.UpdateNeighbour(n)
         return self
@@ -103,19 +100,12 @@ class Tile(Background):
     def UpdateSprites(self, material, side):
         self.possible.clear()
         for s in self.sprites:
-            if s.sides[side] == material:
+            if s.split('_')[side] == material:
                 self.possible.append(s)
-        if Tile.next is None:
-            Tile.next = self
-            return
-        if len(Tile.next.possible) > len(self.possible):
-            return
-        Tile.next = self
         self.Collapse()
 
 
 class Chunk:
-    update_queue = []
     sum_width = 0
     sum_height = 0
 
@@ -124,6 +114,8 @@ class Chunk:
         self.width = 3
         self.height = 3
         self.center = (pos[0] * self.width - pos[1] * self.width, pos[0] * self.height + pos[1] * self.height)
+        self.tiles = []
+        self.next = None
 
     def Generate(self):
         i = self.center[0]
@@ -132,52 +124,53 @@ class Chunk:
             for x in range(self.width):
                 dx = self.center[1] * 50 + self.center[0] * 50
                 dy = self.center[1] * 25 - self.center[0] * 25
-                t = Tile((x * 100 + dx, y * 50 + dy), (i, j))     # even
-                t2 = Tile((x * 100 + 50 + dx, y * 50 + 25 + dy), (i, j + 1))          # odd
+                t = Tile((x * 100 + dx, y * 50 + dy), (i, j))  # even
+                t2 = Tile((x * 100 + 50 + dx, y * 50 + 25 + dy), (i, j + 1))  # odd
                 for s in SpriteLoader.tiles.keys():
-                    t.sprites.append(Sprite(s, (100, 100)))
-                    t2.sprites.append(Sprite(s, (100, 100)))
+                    t.sprites.append(s)
+                    t2.sprites.append(s)
                     t.SpriteLeft += 1
                     t2.SpriteLeft += 1
-                t.addComponent(OnClick())
+                '''t.addComponent(OnClick())
                 t2.addComponent(OnClick())
                 t.components["onClick"].addEvent(t.selectTile)
-                t2.components["onClick"].addEvent(t2.selectTile)
+                t2.components["onClick"].addEvent(t2.selectTile)'''
                 t.addComponent(Collider2D())
                 t2.addComponent(Collider2D())
                 t.components["collider2D"].points = [(0, 60), (50, 35), (100, 60), (50, 85)]
                 t2.components["collider2D"].points = [(0, 60), (50, 35), (100, 60), (50, 85)]
+                self.tiles.append(t)
+                self.tiles.append(t2)
                 i += 1
                 j += 1
             j -= 2
             i -= 4
 
-    @staticmethod
-    def CalculateNeighbours():
-        for tile in Tile.unknown_tiles.values():
+    def CalculateNeighbours(self):
+        for tile in self.tiles:
             xy = tile.id.split(',')
             x, y = int(xy[0]), int(xy[1])
             north = f"{x},{y - 1}"
-            if north in Tile.unknown_tiles.keys():
-                tile.neighbours[Tile.NORTH] = Tile.unknown_tiles[north]
+            if north in Tile.tiles.keys():
+                tile.neighbours[Tile.NORTH] = Tile.tiles[north]
             south = f"{x},{y + 1}"
-            if south in Tile.unknown_tiles.keys():
-                tile.neighbours[Tile.SOUTH] = Tile.unknown_tiles[south]
+            if south in Tile.tiles.keys():
+                tile.neighbours[Tile.SOUTH] = Tile.tiles[south]
             east = f"{x + 1},{y}"
-            if east in Tile.unknown_tiles.keys():
-                tile.neighbours[Tile.EAST] = Tile.unknown_tiles[east]
+            if east in Tile.tiles.keys():
+                tile.neighbours[Tile.EAST] = Tile.tiles[east]
             west = f"{x - 1},{y}"
-            if west in Tile.unknown_tiles.keys():
-                tile.neighbours[Tile.WEST] = Tile.unknown_tiles[west]
+            if west in Tile.tiles.keys():
+                tile.neighbours[Tile.WEST] = Tile.tiles[west]
 
-    @staticmethod
-    def Collapse():
-        if (Tile.next is None or Tile.next.isCollapsed) and len(Tile.unknown_tiles) > 0:
-            t = rnd.choice(list(Tile.unknown_tiles.keys()))
-            Tile.unknown_tiles[t].Collapse()
+    def Collapse(self):
+        if (self.next is None or self.next.isCollapsed) and len(self.tiles) > 0:
+            t = rnd.choice(self.tiles)
+            t.Collapse()
+            self.tiles.remove(t)
         else:
             Tile.next.Collapse()
 
     @staticmethod
     def GetViewSize():
-        return Chunk.sum_width * 150, Chunk.sum_height * 25
+        return Chunk.sum_width * 100 * 3, Chunk.sum_height * 50 * 3

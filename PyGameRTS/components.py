@@ -1,4 +1,5 @@
 import pygame
+import numpy as np
 from os import listdir
 from os.path import isfile, join
 
@@ -70,65 +71,56 @@ class Transform(Component):
         self.pos = pygame.Vector2(pos[0], pos[1])
         self.size = pygame.Vector2()
 
+class CustomLayeredUpdates(pygame.sprite.LayeredUpdates):
+    def sprite_layer(self, sprite):
+        return sprite.rect.y
 
-class Sprite(Component):
-    sprites = []
-    background = []
-    ui = []
+class Sprite(pygame.sprite.Sprite, Component):
+    ui_sprites = CustomLayeredUpdates()
+    background_sprites = CustomLayeredUpdates()
+    all_sprites = CustomLayeredUpdates()
 
     def __init__(self, name, size):
-        super().__init__("sprite")
-        if type(size) is tuple:
-            self.size = pygame.Vector2(size[0], size[1])
-        else:
-            self.size = pygame.Vector2()
+        super().__init__(self.all_sprites)
+        Component.__init__(self, "sprite")
+        self.size = pygame.Vector2(size[0], size[1]) if isinstance(size, tuple) else pygame.Vector2()
         if name in SpriteLoader.sprites.keys():
-            self._sprite = SpriteLoader.sprites[name]
+            self.image = pygame.transform.scale(SpriteLoader.sprites[name], self.size)
         else:
-            self._sprite = SpriteLoader.tiles[name]
+            self.image = pygame.transform.scale(SpriteLoader.tiles[name], self.size)
+        self.rect = self.image.get_rect()
+        self.rect.size = self.size
         self.sprite_name = name
         if name.count("_") > 0:
             self.sides = name.split("_")
         self.resize(self.size)
 
     @property
-    def sprite(self):
-        return self._sprite
-
-    @sprite.setter
-    def sprite(self, s):
-        self._sprite = s
-        self.resize()
-
-    def swap(self, s):
-        self.sprite = s
-
-    @property
     def parent(self):
         return self._parent
+
+    def swap(self, s):
+        self.image = pygame.transform.scale(s, self.size)
 
     @parent.setter
     def parent(self, p):
         self._parent = p
         if isinstance(p, Background):
-            Sprite.background.append(self)
-            Sprite.background.sort()
+            if not self.groups():
+                self.add(self.background_sprites)
         elif isinstance(p, UI):
-            Sprite.ui.append(self)
-            Sprite.ui.sort()
+            if not self.groups():
+                self.add(self.ui_sprites)
         else:
-            Sprite.sprites.append(self)
-            Sprite.sprites.sort()
+            if not self.groups():
+                self.add(self.all_sprites)
         p.transform.size = self.size
 
     def resize(self, size=None):
         if size:
             self.size = size
-        self._sprite = pygame.transform.scale(self._sprite, self.size)
-
-    def __lt__(self, other):
-        return self.parent.transform.pos.y < other.parent.transform.pos.y
-
+        self.image = pygame.transform.scale(self.image, self.size)
+        self.rect.size = self.size
 
 class Text(Component):
     TOP = 1
@@ -169,7 +161,7 @@ class Text(Component):
 
 class Camera:
     pos = pygame.Vector2(-50,-75)
-    cord = (-50,-75)
+    cord = (-50, -75)
 
 
 class Render:
@@ -182,6 +174,7 @@ class Render:
     ALL = 63
 
     screen = None
+    clip_rect = None
     shapes = {}
 
     @staticmethod
@@ -197,21 +190,27 @@ class Render:
     @staticmethod
     def render_frame(flags=NONE):
         if flags & Render.BACKGROUND:
-            for s in Sprite.background:
+            for s in Sprite.background_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                Render.screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+                if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
+                    s.rect.x = x + Camera.pos.x
+                    s.rect.y = y + Camera.pos.y
+            pygame.sprite.Group.draw(Sprite.background_sprites, Render.screen)
         if flags & Render.SPRITE:
-            for s in Sprite.sprites:
+            for s in Sprite.all_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                Render.screen.blit(s.sprite, (x + Camera.pos.x, y + Camera.pos.y))
+                if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
+                    Render.screen.blit(s.image, (x + Camera.pos.x, y + Camera.pos.y))
         if flags & Render.UI:
-            for s in Sprite.ui:
+            for s in Sprite.ui_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                Render.screen.blit(s.sprite, (x, y))
+                if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
+                    Render.screen.blit(s.image, (x, y))
         if flags & Render.TEXT:
             for t in Text.texts:
                 x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
-                Render.screen.blit(UI.font.render(t.text, True, t.color), (x - t.dx, y - t.dy - UI.font_size * 0.16))
+                if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
+                    Render.screen.blit(UI.font.render(t.text, True, t.color), (x - t.dx, y - t.dy - UI.font_size * 0.16))
         if flags & Render.OVERLAY:
             for s in Render.shapes.values():
                 points, color = s
@@ -254,7 +253,10 @@ class OnClick(Component):
             OnClick.GO_LAYER += 1
 
     def __call__(self):
-        self.function(self.params[0])
+        if len(self.params) == 0:
+            self.function()
+        else:
+            self.function(self.params[0])
 
 
 class Collider2D(Component):
