@@ -71,14 +71,12 @@ class Transform(Component):
         self.pos = pygame.Vector2(pos[0], pos[1])
         self.size = pygame.Vector2()
 
-class CustomLayeredUpdates(pygame.sprite.LayeredUpdates):
-    def sprite_layer(self, sprite):
-        return sprite.rect.y
 
 class Sprite(pygame.sprite.Sprite, Component):
-    ui_sprites = CustomLayeredUpdates()
-    background_sprites = CustomLayeredUpdates()
-    all_sprites = CustomLayeredUpdates()
+    ui_sprites = pygame.sprite.LayeredUpdates()
+    background_sprites = pygame.sprite.LayeredUpdates()
+    game_sprites = pygame.sprite.LayeredUpdates()
+    all_sprites = pygame.sprite.LayeredUpdates()
 
     def __init__(self, name, size):
         super().__init__(self.all_sprites)
@@ -106,14 +104,13 @@ class Sprite(pygame.sprite.Sprite, Component):
     def parent(self, p):
         self._parent = p
         if isinstance(p, Background):
-            if not self.groups():
-                self.add(self.background_sprites)
+            Sprite.background_sprites.add(self, layer=0)
         elif isinstance(p, UI):
-            if not self.groups():
-                self.add(self.ui_sprites)
+            self.rect.x = p.transform.pos.x
+            self.rect.y = p.transform.pos.y
+            Sprite.ui_sprites.add(self, layer=2)
         else:
-            if not self.groups():
-                self.add(self.all_sprites)
+            Sprite.game_sprites.add(self, layer=1)
         p.transform.size = self.size
 
     def resize(self, size=None):
@@ -121,6 +118,7 @@ class Sprite(pygame.sprite.Sprite, Component):
             self.size = size
         self.image = pygame.transform.scale(self.image, self.size)
         self.rect.size = self.size
+
 
 class Text(Component):
     TOP = 1
@@ -193,19 +191,16 @@ class Render:
             for s in Sprite.background_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
                 if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
-                    s.rect.x = x + Camera.pos.x
-                    s.rect.y = y + Camera.pos.y
-            pygame.sprite.Group.draw(Sprite.background_sprites, Render.screen)
+                    Render.screen.blit(s.image, (x + Camera.pos.x, y + Camera.pos.y))
         if flags & Render.SPRITE:
-            for s in Sprite.all_sprites:
+            for s in Sprite.game_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
                 if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
                     Render.screen.blit(s.image, (x + Camera.pos.x, y + Camera.pos.y))
         if flags & Render.UI:
             for s in Sprite.ui_sprites:
-                x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
-                if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
-                    Render.screen.blit(s.image, (x, y))
+                x, y = s.rect.x, s.rect.y
+                Render.screen.blit(s.image, (x, y))
         if flags & Render.TEXT:
             for t in Text.texts:
                 x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
