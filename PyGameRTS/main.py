@@ -6,6 +6,8 @@ from uiElements import *
 from tile import Tile, Chunk
 from mapObject import MapObject
 
+UI_TEXT_COLOR = (200, 184, 165)
+
 sys.setrecursionlimit(1000)
 
 SpriteLoader()
@@ -25,10 +27,14 @@ for c in chunks:
     c.CalculateNeighbours()
     c.Collapse()
 
-u1 = Icon((w - 150, h - 150))
-u1.addComponent(Sprite("house", (100, 100)))
+ui_overlay = Icon((0, 0))
+ui_overlay.addComponent(Sprite("ui", (800, 600)))
 
-t1 = TextUI((w - 100, h - 50))
+u1 = Icon((606, 505))
+u1.addComponent(Sprite("house", (88, 88)))
+
+t1 = TextUI((765, 580))
+t1.components["text"].set_font_size(16)
 
 
 def addTree():
@@ -41,10 +47,12 @@ def addTree():
 
 
 b1 = Button((w - 150, h - 250))
+b1.components["text"].color = UI_TEXT_COLOR
 b1.components["onClick"].addEvent(addTree)
 b1.addComponent(Collider2D())
 
 last = None
+
 
 def showInfo(obj):
     global last
@@ -52,6 +60,7 @@ def showInfo(obj):
         last.tile.selectTile()
     u1.components["sprite"].swap(obj.components["sprite"].image)
     t1.components["text"].text = "100/100"
+    t1.components["text"].color = UI_TEXT_COLOR
     obj.tile.selectTile()
     last = obj
 

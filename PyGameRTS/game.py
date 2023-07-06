@@ -7,10 +7,11 @@ from tile import Chunk
 
 class Game:
     FPS = 60
+    UI_size = 200
     clock = time.Clock()
     screen = None
     size = None
-    scroll_speed = 150
+    scroll_speed = 0.15
     mouse_scroll = True
     draw_hit_box = False
     fpsUIText = None
@@ -20,8 +21,7 @@ class Game:
         init()
         Game.screen = display.set_mode([size[0], size[1]])
         Render.screen = Game.screen
-        Render.clip_rect = Rect(1, 1, size[0]-2, size[1]-2)
-        Render.screen.set_clip(Render.clip_rect)
+        Render.clip_rect = Rect(1, 1, size[0] - Game.UI_size - 2, size[1]-2)
         Game.size = Vector2(size[0], size[1])
         Game.fpsUIText = TextUI()
         Game.fpsUIText.components["text"].color = (100, 255, 100)
@@ -39,8 +39,8 @@ class Game:
             s.convert()
         Render.render_frame(Render.ALL)
         while True:
-            dt = Game.clock.tick(60) / 1000
-            events = event.get([MOUSEBUTTONDOWN, KEYDOWN, KEYUP])
+            dt = Game.clock.tick(60)
+            events = event.get()
             flags = Render.NONE
             if show_fps:
                 Game.FPS = Game.clock.get_fps()
@@ -74,12 +74,9 @@ class Game:
                     if _event.key == K_F3: Game.draw_hit_box = False
                     if _event.key == K_F4 and not show_fps: show_fps = True; break
                     if _event.key == K_F4 and show_fps: show_fps = False
-            event_ = event.poll()
-            while event_.type != NOEVENT:
-                if event_.type == QUIT:
+                if _event.type == QUIT:
                     quit()
                     sys.exit()
-                event_ = event.poll()
 
             x, y = mouse.get_pos()
             view_x, view_y = Chunk.GetViewSize()
@@ -92,7 +89,7 @@ class Game:
                     Camera.pos.x += Game.scroll_speed * dt
                     flags = Render.ALL
             if press_right or (Game.size.x - 10 < x < Game.size.x + 10 and Game.mouse_scroll):
-                if -view_x + self.size[0] < Camera.pos.x - Game.scroll_speed * dt < -50:
+                if -view_x + self.size[0] - Game.UI_size < Camera.pos.x - Game.scroll_speed * dt < -50:
                     Camera.pos.x -= Game.scroll_speed * dt
                     flags = Render.ALL
             if press_down or (Game.size.y - 10 < y < Game.size.y + 10 and Game.mouse_scroll):

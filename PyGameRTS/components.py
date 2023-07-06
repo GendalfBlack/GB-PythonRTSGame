@@ -51,6 +51,7 @@ class SpriteLoader:
         SpriteLoader.load("Sprites/house-sprite.png", "house")
         SpriteLoader.load("Sprites/grass-tile.png", "grass")
         SpriteLoader.load("Sprites/black-color.png", "black")
+        SpriteLoader.load("Sprites/ui-overlay.png", "ui")
         path = "D:/2.3.PythonPublic/GB-PythonProjects/PyGameRTS/Hand-drawn-sprites"
         tiles = [f for f in listdir(path) if isfile(join(path,f))]
         for t in tiles:
@@ -126,13 +127,19 @@ class Text(Component):
     CENTER = 4
     texts = []
 
-    def __init__(self, text, color=(0, 0, 0), flags=CENTER):
+    def __init__(self, text, color=(0, 0, 0), font_size=25, flags=CENTER):
         super().__init__("text")
         self._text = text
         self.color = color
         self.dx = 0
         self.dy = 0
+        self.font_size = font_size
+        self.font = pygame.font.SysFont('Minecraft', font_size)
         self.flags = flags
+
+    def set_font_size(self, font_size):
+        self.font_size = font_size
+        self.font = pygame.font.SysFont('Minecraft', font_size)
 
     @property
     def text(self):
@@ -187,6 +194,7 @@ class Render:
 
     @staticmethod
     def render_frame(flags=NONE):
+        Render.screen.set_clip(Render.clip_rect)
         if flags & Render.BACKGROUND:
             for s in Sprite.background_sprites:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
@@ -197,6 +205,7 @@ class Render:
                 x, y = s.parent.transform.pos.x, s.parent.transform.pos.y
                 if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
                     Render.screen.blit(s.image, (x + Camera.pos.x, y + Camera.pos.y))
+        Render.screen.set_clip(None)
         if flags & Render.UI:
             for s in Sprite.ui_sprites:
                 x, y = s.rect.x, s.rect.y
@@ -205,7 +214,8 @@ class Render:
             for t in Text.texts:
                 x, y = t.parent.transform.pos.x, t.parent.transform.pos.y
                 if 800 - Camera.pos.x > x > Camera.pos.x and 600 - Camera.pos.y > y > Camera.pos.y:
-                    Render.screen.blit(UI.font.render(t.text, True, t.color), (x - t.dx, y - t.dy - UI.font_size * 0.16))
+                    Render.screen.blit(t.font.render(t.text, True, (166, 127, 77)), (x - t.dx, y - t.dy - t.font_size * 0.16+2))
+                    Render.screen.blit(t.font.render(t.text, True, t.color), (x - t.dx, y - t.dy - t.font_size * 0.16))
         if flags & Render.OVERLAY:
             for s in Render.shapes.values():
                 points, color = s

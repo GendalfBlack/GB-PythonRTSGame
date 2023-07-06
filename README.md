@@ -73,7 +73,7 @@ You can find examples of usage of the game engine in the examples directory.
 
 Here is an example of how the game window looks:
 
-![Game Window](PyGameRTS/Previews/preview5.png)
+![Game Window](PyGameRTS/Previews/preview6.png)
 
 
 ## Contributing
