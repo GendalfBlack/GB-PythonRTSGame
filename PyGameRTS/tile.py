@@ -3,6 +3,7 @@ from Components.SpriteLoaderComponent import SpriteLoader
 from Components.Collider2DComponent import Collider2D
 from Components.SpriteComponent import Sprite
 from Components.RenderComponent import Render
+from Components.OnClickComponent import OnClick
 import random as rnd
 
 
@@ -50,6 +51,8 @@ class Tile(Background):
     def getRandom():
         return rnd.choice(list(Tile.tiles.values()))
 
+    last_selected = None
+
     def selectTile(self, color=(255, 0, 0)):
         if not self.components["collider2D"]:
             return
@@ -60,6 +63,10 @@ class Tile(Background):
 
         Render.draw_rectangle(self.id, self.components["collider2D"].points, color)
         self.selected = True
+        if Tile.last_selected != self and Tile.last_selected:
+            Render.remove_rectangle(Tile.last_selected.id)
+            Tile.last_selected.selected = False
+        Tile.last_selected = self
 
     def Collapse(self):
         if self.isCollapsed:
@@ -135,10 +142,10 @@ class Chunk:
                     t2.sprites.append(s)
                     t.SpriteLeft += 1
                     t2.SpriteLeft += 1
-                '''t.addComponent(OnClick())
+                t.addComponent(OnClick())
                 t2.addComponent(OnClick())
                 t.components["onClick"].addEvent(t.selectTile)
-                t2.components["onClick"].addEvent(t2.selectTile)'''
+                t2.components["onClick"].addEvent(t2.selectTile)
                 t.addComponent(Collider2D())
                 t2.addComponent(Collider2D())
                 t.components["collider2D"].points = [(0, 60), (50, 35), (100, 60), (50, 85)]
