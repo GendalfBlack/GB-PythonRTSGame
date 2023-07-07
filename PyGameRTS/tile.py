@@ -1,4 +1,8 @@
-from components import *
+from Components.BackgroundComponent import Background
+from Components.SpriteLoaderComponent import SpriteLoader
+from Components.Collider2DComponent import Collider2D
+from Components.SpriteComponent import Sprite
+from Components.RenderComponent import Render
 import random as rnd
 
 

@@ -1,4 +1,6 @@
-from components import *
+from Components.UIComponent import UI
+from Components.TextComponents import Text
+from Components.OnClickComponent import OnClick
 
 
 class Icon(UI):

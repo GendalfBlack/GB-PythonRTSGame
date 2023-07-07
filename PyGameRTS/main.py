@@ -1,8 +1,11 @@
 import random as rnd
 import sys
 from game import Game
-from components import *
 from uiElements import *
+from Components.SpriteLoaderComponent import SpriteLoader
+from Components.SpriteComponent import Sprite
+from Components.Collider2DComponent import Collider2D
+from Components.OnClickComponent import OnClick
 from tile import Tile, Chunk
 from mapObject import MapObject
 

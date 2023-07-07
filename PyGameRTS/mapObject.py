@@ -1,5 +1,4 @@
-from components import *
-
+from Components.GameObjectComponent import GameObject
 
 class MapObject(GameObject):
     def __init__(self, tile, **args):
